@@ -62,8 +62,34 @@ const items = [
   { name: "toucan", image: "assets/toucan.png" },
   { name: "turtle", image: "assets/turtle.png" },
   { name: "whale", image: "assets/whale.png" },
-
 ];
+
+//Initial Time
+let seconds = 0,
+  minutes = 0;
+//Initial moves and win count
+let movesCount = 0,
+  winCount = 0;
+
+//For timer
+const timeGenerator = () => {
+  seconds += 1;
+  //minutes logic
+  if (seconds >= 60) {
+    minutes += 1;
+    seconds = 0;
+  }
+  //format time before displaying
+  let secondsValue = seconds < 10 ? `0${seconds}` : seconds;
+  let minutesValue = minutes < 10 ? `0${minutes}` : minutes;
+  timeValue.innerHTML = `<span>Tiempo:</span>${minutesValue}:${secondsValue}`;
+};
+
+//For calculating moves
+const movesCounter = () => {
+  movesCount += 1;
+  moves.innerHTML = `<span>Intentos:</span>${movesCount}`;
+};
 
 //Pick random objects from the items array
 const generateRandom = (size = 4) => {
@@ -122,6 +148,7 @@ const matrixGenerator = (cardValues, size = 4) => {
           firstCardValue = card.getAttribute("data-card-value");
         } else {
           //increment moves since user selected second card
+          movesCounter();
           //secondCard and value
           secondCard = card;
           let secondCardValue = card.getAttribute("data-card-value");
@@ -135,8 +162,11 @@ const matrixGenerator = (cardValues, size = 4) => {
             winCount += 1;
             //check if winCount ==half of cardValues
             if (winCount == Math.floor(cardValues.length / 2)) {
-              result.innerHTML = `<h2>You Won</h2>
-            <h4>Moves: ${movesCount}</h4>`;
+              setTimeout(() => {
+                result.innerHTML = `<h2Ganaste!</h2>
+            <h4>Intentos: ${movesCount}</h4>`;
+                stopGame();
+              }, 1000);
             }
           } else {
             //if the cards dont match
@@ -155,12 +185,38 @@ const matrixGenerator = (cardValues, size = 4) => {
   });
 };
 
+//Start game
+startButton.addEventListener("click", () => {
+  movesCount = 0;
+  seconds = 0;
+  minutes = 0;
+  //controls amd buttons visibility
+  controls.classList.add("hide");
+  stopButton.classList.remove("hide");
+  startButton.classList.add("hide");
+  //Start timer
+  interval = setInterval(timeGenerator, 1000);
+  //initial moves
+  moves.innerHTML = `<span>Intentos:</span> ${movesCount}`;
+  initializer();
+});
+
+//Stop game
+stopButton.addEventListener(
+  "click",
+  (stopGame = () => {
+    controls.classList.remove("hide");
+    stopButton.classList.add("hide");
+    startButton.classList.remove("hide");
+    clearInterval(interval);
+  })
+);
+
 //Initialize values and func calls
 const initializer = () => {
+  result.innerText = "";
   winCount = 0;
   let cardValues = generateRandom();
   console.log(cardValues);
   matrixGenerator(cardValues);
 };
-
-initializer();
